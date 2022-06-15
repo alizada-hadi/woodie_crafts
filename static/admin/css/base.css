@@ -311,7 +311,7 @@ table {
 }
 
 td, th {
-    font-size: 13px;
+    font-size: 15px;
     line-height: 16px;
     border-bottom: 1px solid var(--hairline-color);
     vertical-align: top;
@@ -382,12 +382,14 @@ thead th.sorted .text {
 table thead th .text span {
     padding: 8px 10px;
     display: block;
+    font-size: 15px;
 }
 
 table thead th .text a {
     display: block;
     cursor: pointer;
     padding: 8px 10px;
+    font-size: 15px;
 }
 
 table thead th .text a:focus, table thead th .text a:hover {
@@ -476,9 +478,9 @@ input, textarea, select, .form-row p, form .button {
     margin: 2px 0;
     padding: 2px 3px;
     vertical-align: middle;
-    font-family: "Roboto", "Lucida Grande", Verdana, Arial, sans-serif;
+    font-family: "IranSanse";
     font-weight: normal;
-    font-size: 13px;
+    font-size: 15px;
 }
 .form-row div.help {
     padding: 2px 3px;
@@ -505,7 +507,7 @@ textarea:focus, select:focus, .vTextField:focus {
 }
 
 select {
-    height: 30px;
+    height: 33px;
 }
 
 select[multiple] {
@@ -597,7 +599,7 @@ input[type=button][disabled].default {
 
 .module caption,
 .inline-group h2 {
-    font-size: 12px;
+    font-size: 16px;
     letter-spacing: 0.5px;
     text-transform: uppercase;
 }
@@ -616,7 +618,7 @@ ul.messagelist {
 ul.messagelist li {
     display: block;
     font-weight: 400;
-    font-size: 13px;
+    font-size: 16px;
     padding: 10px 10px 10px 65px;
     margin: 0 0 10px 0;
     background: var(--message-success-bg) url(../img/icon-yes.svg) 40px 12px no-repeat;
@@ -698,6 +700,7 @@ td ul.errorlist + input, td ul.errorlist + select, td ul.errorlist + textarea {
 
 .description {
     font-size: 12px;
+    color: blue;
     padding: 5px 0 0 12px;
 }
 
@@ -847,7 +850,7 @@ table#change-history tbody th {
 }
 
 .dashboard #content {
-    width: 600px;
+    width: 700px;
 }
 
 #content-main {
