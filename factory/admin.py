@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Customer, ProductCategory, Order, OrderDetail
+from .models import Customer, ProductCategory, Order, OrderDetail, ReceiveMoney
 from jalali_date import datetime2jalali, date2jalali
 from jalali_date.admin import ModelAdminJalaliMixin, StackedInlineJalaliMixin, TabularInlineJalaliMixin
 from django.utils.html import format_html, urlencode
@@ -23,6 +23,7 @@ order_pdf.short_description = "چاپ جزییات فرمایش"
 
 
 
+
 @admin.register(OrderDetail)
 class OrderDetailAdmin(admin.ModelAdmin):
     def has_add_permission(self, request, obj=None):
@@ -32,10 +33,6 @@ class OrderDetailAdmin(admin.ModelAdmin):
     list_display = ["order", "height", "width", "depth", "direction", "qty", "price"]
     list_filter = ["direction", "price", "height", "width", "depth"]
     search_fields = ["height", "width", "direction"]
-
-
-
-
 
 class OrderDetailInline(admin.StackedInline):
     fieldsets = (
@@ -53,16 +50,14 @@ class OrderDetailInline(admin.StackedInline):
     model = OrderDetail
     raw_id_fields = ('product', )
     exclude = ["total"]
-    extra = 1
-
+    extra = 0
 
 @admin.register(Order)
 class OrderAdmin(ModelAdminJalaliMixin, admin.ModelAdmin):
-    inlines = [OrderDetailInline]
-    
-    
-    fields = [("customer", "status", "order_date", )]
+    inlines = [OrderDetailInline]  
+    fields = [("customer", "status", "order_date", ), "amount"]
     raw_id_fields = ("customer", )
+    readonly_fields = ["amount"]
     list_display = ["customer", "status", "order_date", "order_detail_count", "total_cost", order_detail, order_pdf]
     list_filter = ["customer", "status", "order_date"]
     search_fields = ["customer", "product"]
@@ -90,10 +85,6 @@ class OrderAdmin(ModelAdminJalaliMixin, admin.ModelAdmin):
     def get_created_jalali(self, obj):
         return date2jalali(obj.order_date).strftime('%Y/%m/%d')
     get_created_jalali.short_description = "تاریخ ثبت فرمایش"
-
-
-
-
 
 @admin.register(Customer)
 class CustomerAdmin(ModelAdminJalaliMixin, admin.ModelAdmin):
@@ -124,9 +115,6 @@ class CustomerAdmin(ModelAdminJalaliMixin, admin.ModelAdmin):
     
     number_of_order.short_description = "تعداد کل فرمایشات"
 
-    
-
-
 @admin.register(ProductCategory)
 class ProductCategoryAdmin(ModelAdminJalaliMixin, admin.ModelAdmin):
 
@@ -141,3 +129,25 @@ class ProductCategoryAdmin(ModelAdminJalaliMixin, admin.ModelAdmin):
 
     list_display = ["category_name", "image_tag", "get_created_jalali"]
     search_fields = ["product"]
+
+@admin.register(ReceiveMoney)
+class ReceiveMoneyAdmin(ModelAdminJalaliMixin, admin.ModelAdmin):
+    def get_created_jalali(self, obj):
+        return date2jalali(obj.receive_date).strftime('%Y/%m/%d')
+    get_created_jalali.short_description = 'تاریخ اخذ پول'
+    list_display = ["order", "receive_amount", "remain_amount", "get_created_jalali"]
+    list_editable = ["receive_amount"]
+    list_filter = ["order__customer", "receive_amount", "remain_amount", "receive_date"]
+    autocomplete_fields = ["order"]
+    search_fields = ["order__customer", "receive_amount"]
+    list_per_page = 10
+    fieldsets = (
+        ("ثبت دریافتی پول", {
+            "fields" : [("order","receive_amount", "receive_date", )], 
+            "classes" : ('wide', 'extrapretty',)
+            
+        }),
+    )
+
+    
+

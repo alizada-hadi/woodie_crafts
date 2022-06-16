@@ -52,6 +52,7 @@ class Order(models.Model):
     
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE, null=True, verbose_name="نام مشتری")
     status = models.CharField(max_length=20, choices=ORDER_STATUS, default="جدید", verbose_name="وضعیت فرمایش")
+    amount = models.DecimalField(max_digits=10, decimal_places=2, default=0,  verbose_name="مقدار باقی مانده")
     order_date = models.DateField(verbose_name="تاریخ فرمایش")
 
 
@@ -95,3 +96,22 @@ class OrderDetail(models.Model):
 
     def total_cost(self):
         return self.price * self.qty
+
+
+
+"""
+Recieve money from customers for specific orders
+"""
+class ReceiveMoney(models.Model):
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, verbose_name="دریافتی از مشتری")
+    receive_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name="مقدار اخذ شده")
+    remain_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name="مقدار باقی مانده")
+    receive_date = models.DateField(verbose_name="تاریخ اخذ پول")
+
+
+    class Meta:
+        verbose_name = "دریافتی"
+        verbose_name_plural = "دریافتی ها"
+    
+    def __str__(self) -> str:
+        return f"دریافتی از {self.order.customer.first_name} {self.order.customer.last_name}"
