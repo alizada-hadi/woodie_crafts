@@ -5,7 +5,23 @@ from jalali_date.admin import ModelAdminJalaliMixin, StackedInlineJalaliMixin, T
 from django.utils.html import format_html, urlencode
 from django.db.models import Count
 from django.urls  import reverse
+from django.utils.safestring import mark_safe
 # Register your models here.
+
+
+
+def order_detail(obj):
+    url = reverse("factory:admin_order_detail", args=[obj.id])
+    return mark_safe(f"<a href='{url}'>نمایش</a>")
+
+order_detail.short_description = "جزییات فرمایش"
+
+def order_pdf(obj):
+    url = reverse("factory:admin_order_pdf", args=[obj.id])
+    return mark_safe(f"<a target='_blank' href='{url}'>چاپ</a>")
+order_pdf.short_description = "چاپ جزییات فرمایش"
+
+
 
 @admin.register(OrderDetail)
 class OrderDetailAdmin(admin.ModelAdmin):
@@ -47,7 +63,7 @@ class OrderAdmin(ModelAdminJalaliMixin, admin.ModelAdmin):
     
     fields = [("customer", "status", "order_date", )]
     raw_id_fields = ("customer", )
-    list_display = ["customer", "status", "order_date", "order_detail_count", "total_cost"]
+    list_display = ["customer", "status", "order_date", "order_detail_count", "total_cost", order_detail, order_pdf]
     list_filter = ["customer", "status", "order_date"]
     search_fields = ["customer", "product"]
     list_editable = ["status", "order_date"]

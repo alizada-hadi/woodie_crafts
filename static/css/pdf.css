@@ -1,0 +1,52 @@
+@page{
+    size: Letter;
+    margin: 0in 0.44in 0.2in 0.44in;
+    direction: rtl;
+}
+
+.big--title{
+    text-align: center;
+}
+.bil--no{
+    font-weight: 600;
+    font-size: 18px;
+    padding: 0px;
+    margin: 0px;
+}
+.order--date{
+    color: gray;
+}
+.bil--to{
+    margin:0px;
+    padding: 0px;
+    font-weight: bold;
+    font-size: 20px;
+    color: black;
+}
+.customer--detail{
+    margin:0px;
+    padding: 0px;
+    font-size: 15px;
+    letter-spacing: 0.2px;
+}
+
+.items--ordered{
+    margin:4px 0px;
+    padding: 0px;
+    font-weight: bold;
+    font-size: 20px;
+    color: black;
+}
+
+table{
+    width: 100%;
+}
+
+table thead tr th{
+    text-align: center;
+    background-color: lightgray;
+}
+table tbody tr td{
+    text-align: center;
+}
+

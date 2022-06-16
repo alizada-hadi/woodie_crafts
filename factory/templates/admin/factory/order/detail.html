@@ -1,0 +1,70 @@
+{% extends 'admin/base_site.html' %}
+{% load jalali_tags %}
+{% block title %}
+    فرمایش {{order.id}} {{block.super}}
+{% endblock title %}
+
+{% block breadcrumbs %}
+    <div class="breadcrumbs">
+        <a href="{% url "admin:index" %}">شروع</a> &rsaquo;
+        <a href="{% url "admin:factory_order_changelist" %}">فرمایشات</a>
+        &rsaquo;
+        <a href="{% url "admin:factory_order_change" order.id %}">فرمایش شماره {{ order.id }}</a>
+        &rsaquo; جزییات
+    </div>
+{% endblock %}
+
+{% block content %}
+    <h1>فرمایش نمبر #{{order.id}}</h1>
+    <ul class="object-tools">
+        <li>
+            <a href="#" onclick="window.print();">چاپ فرمایش</a>
+        </li>
+    </ul>
+    <table>
+        <tr>
+            <th>فرمایش دهنده</th>
+            <td>{{order.customer.first_name}} - {{order.customer.last_name}}</td>
+        </tr>
+        <tr>
+            <th>تاریخ ثبت فرمایش</th>
+            <td>{{order.order_date|to_jalali:"%Y/%m/%d"}}</td>
+        </tr>
+        <tr>
+            <th>وضعیت فرمایش</th>
+            <td>{{order.status}}</td>
+        </tr>
+    </table>
+
+    <div class="module">
+        <h2>تفصیلات فرمایش</h2>
+        <table style="width: 100%">
+            <thead>
+                <tr>
+                    <th style="font-size: 15px;">محصول</th>
+                    <th style="font-size: 15px;">اندازه</th>
+                    <th style="font-size: 15px;">تعداد</th>
+                    <th style="font-size: 15px;">قیمت فی دانه</th>
+                    <th style="font-size: 15px;">واحد پول</th>
+                    <th style="font-size: 15px;">مجموع</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in order.orderdetail_set.all %}
+                    <tr class="row{% cycle '1' '2' %}">
+                        <td>{{item.product.category_name}}</td>
+                        <td class="num">{{item.height}} &cross; {{item.width}}</td>
+                        <td class="num">{{item.qty}}</td>
+                        <td class="num">{{item.price}}</td>
+                        <td class="num">{{item.price_unit}}</td>
+                        <td class="num">{{item.total_cost}}</td>
+                    </tr>
+                {% endfor %}
+                <tr class="total">
+                    <td colspan="5">مجموع</td>
+                    <td class="num">{{total}} دالر</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+{% endblock content %}
