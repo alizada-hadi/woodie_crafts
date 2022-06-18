@@ -1,11 +1,12 @@
 from django.contrib import admin
-from .models import Customer, ProductCategory, Order, OrderDetail, ReceiveMoney
+from .models import Customer, EmployeeSalaryPayment, EmployeeWork, ProductCategory, Order, OrderDetail, ReceiveMoney, Employee
 from jalali_date import datetime2jalali, date2jalali
 from jalali_date.admin import ModelAdminJalaliMixin, StackedInlineJalaliMixin, TabularInlineJalaliMixin
 from django.utils.html import format_html, urlencode
 from django.db.models import Count
 from django.urls  import reverse
 from django.utils.safestring import mark_safe
+from django_admin_inline_paginator.admin import TabularInlinePaginated
 # Register your models here.
 
 
@@ -22,6 +23,14 @@ def order_pdf(obj):
 order_pdf.short_description = "چاپ جزییات فرمایش"
 
 
+# employee work deta
+def employee_work(obj):
+    url = reverse("factory:employee_work_detail", args=[obj.id])
+    return mark_safe(f"<a href='{url}'>نمایش</a>")
+
+employee_work.short_description = "لیست کارکرد ها"
+
+
 def remain_amount_order(obj): # it will pass a ReceiveMoney object
     total = obj.order.amount
     return total
@@ -34,7 +43,7 @@ class OrderDetailAdmin(admin.ModelAdmin):
         return False
     def has_change_permission(self, request, obj = None):
         return False
-    list_display = ["order", "height", "width", "depth", "direction", "qty", "price"]
+    list_display = ["product", "order", "height", "width", "depth", "direction", "qty", "price"]
     list_filter = ["direction", "price", "height", "width", "depth"]
     search_fields = ["height", "width", "direction"]
 
@@ -139,6 +148,7 @@ class ReceiveMoneyAdmin(ModelAdminJalaliMixin, admin.ModelAdmin):
     def get_created_jalali(self, obj):
         return date2jalali(obj.receive_date).strftime('%Y/%m/%d')
 
+    get_created_jalali.short_description = 'تاریخ اخذ پول'
     def save_model(self, request, obj, form, change):
         total = 0
         for i in obj.order.orderdetail_set.all():
@@ -147,7 +157,6 @@ class ReceiveMoneyAdmin(ModelAdminJalaliMixin, admin.ModelAdmin):
         if change:
             obj.remain_amount = x
         obj.save()
-    get_created_jalali.short_description = 'تاریخ اخذ پول'
     list_display = ["order", "receive_amount", "price_unit", "remain_amount", "get_created_jalali"]
     list_editable = ["receive_amount", "price_unit"]
     list_filter = ["order__customer", "receive_amount", "remain_amount", "price_unit", "receive_date"]
@@ -161,3 +170,65 @@ class ReceiveMoneyAdmin(ModelAdminJalaliMixin, admin.ModelAdmin):
             
         }),
     )
+@admin.register(EmployeeWork)
+class EmWAdmin(admin.ModelAdmin):
+    def has_module_permission(self, request):
+        return False
+    search_fields = ["work"]
+
+
+
+class EmployeeWorkAdmin(ModelAdminJalaliMixin, TabularInlinePaginated):
+    def get_created_jalali(self, obj):
+        return date2jalali(obj.assigned_date).strftime('%Y/%m/%d')
+    fieldsets = (
+        ("کارکرد ها", {
+            "fields" : [("order_detail", "qty", "fees", "done", ), ("assigned_date", )], 
+            "classes" : ("collapse", )
+
+        }),
+    )
+    raw_id_fields = ["order_detail"]
+    model = EmployeeWork
+    per_page = 10
+    extra = 0
+
+
+
+
+
+class EmployeeSalaryPaymentAdmin(ModelAdminJalaliMixin, TabularInlinePaginated):
+    fields = [("work", "paid_amount", "paid_at", )]
+    autocomplete_fields = ["work"]
+    model = EmployeeSalaryPayment
+    extra = 0
+    per_page = 10
+    def get_created_jalali(self, obj):
+        return date2jalali(obj.paid_at).strftime('%Y/%m/%d')
+
+    
+
+# employee admin
+@admin.register(Employee)
+class EmployeeAdmin(ModelAdminJalaliMixin, admin.ModelAdmin):
+    def get_created_jalali(self, obj):
+        return date2jalali(obj.created_at).strftime('%Y/%m/%d')
+    list_display = ("first_name", "last_name", "phone_number", "position", "address", "emp_type", "salary", employee_work, )
+    list_filter = ["address", "emp_type", "salary", "position", "created_at"]
+    search_fields = ("first_name", "last_name", "emp_type", "phone_number", "address", )
+    list_editable = ["emp_type"]
+    readonly_fields = ["total_work"]
+    list_per_page = 10
+    inlines = [EmployeeWorkAdmin, EmployeeSalaryPaymentAdmin]
+
+    fieldsets = (
+        ("مشخصات کارمند", {
+            "fields" : [("first_name", "last_name", "emp_type", ), ("phone_number", "address", "position",), ("created_at",), ("total_work",),]
+        }), 
+        ("معاش کارمند", {
+            "fields" : ["salary"], 
+            "classes" : ("collapse",)
+        }),
+    )
+
+

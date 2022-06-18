@@ -43,6 +43,7 @@ INSTALLED_APPS = [
 
     # 3rd party apps
     'jalali_date',
+    'django_admin_inline_paginator',
 ]
 
 JALALI_DATE_DEFAULTS = {
