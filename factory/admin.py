@@ -22,6 +22,10 @@ def order_pdf(obj):
 order_pdf.short_description = "چاپ جزییات فرمایش"
 
 
+def remain_amount_order(obj): # it will pass a ReceiveMoney object
+    total = obj.order.amount
+    return total
+
 
 
 @admin.register(OrderDetail)
@@ -134,20 +138,26 @@ class ProductCategoryAdmin(ModelAdminJalaliMixin, admin.ModelAdmin):
 class ReceiveMoneyAdmin(ModelAdminJalaliMixin, admin.ModelAdmin):
     def get_created_jalali(self, obj):
         return date2jalali(obj.receive_date).strftime('%Y/%m/%d')
+
+    def save_model(self, request, obj, form, change):
+        total = 0
+        for i in obj.order.orderdetail_set.all():
+            total += i.price * i.qty
+        x = total - form.cleaned_data["receive_amount"]
+        if change:
+            obj.remain_amount = x
+        obj.save()
     get_created_jalali.short_description = 'تاریخ اخذ پول'
-    list_display = ["order", "receive_amount", "remain_amount", "get_created_jalali"]
-    list_editable = ["receive_amount"]
-    list_filter = ["order__customer", "receive_amount", "remain_amount", "receive_date"]
+    list_display = ["order", "receive_amount", "price_unit", "remain_amount", "get_created_jalali"]
+    list_editable = ["receive_amount", "price_unit"]
+    list_filter = ["order__customer", "receive_amount", "remain_amount", "price_unit", "receive_date"]
     autocomplete_fields = ["order"]
-    search_fields = ["order__customer", "receive_amount"]
+    search_fields = ["order__customer", "receive_amount", "price_unit"]
     list_per_page = 10
     fieldsets = (
         ("ثبت دریافتی پول", {
-            "fields" : [("order","receive_amount", "receive_date", )], 
+            "fields" : [("order","receive_amount", "price_unit", "receive_date", )], 
             "classes" : ('wide', 'extrapretty',)
             
         }),
     )
-
-    
-

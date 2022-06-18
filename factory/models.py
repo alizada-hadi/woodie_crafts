@@ -103,8 +103,15 @@ class OrderDetail(models.Model):
 Recieve money from customers for specific orders
 """
 class ReceiveMoney(models.Model):
+    PRICE_UNIT = (
+        ("افغانی", "افغانی"), 
+        ("دالر",  "دالر"),
+        ("کلدار",  "کلدار"),
+        ("تومان",  "تومان"),
+    )
     order = models.ForeignKey(Order, on_delete=models.CASCADE, verbose_name="دریافتی از مشتری")
     receive_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name="مقدار اخذ شده")
+    price_unit = models.CharField(max_length=20, choices=PRICE_UNIT, default="دالر", verbose_name="واحد پول")
     remain_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name="مقدار باقی مانده")
     receive_date = models.DateField(verbose_name="تاریخ اخذ پول")
 
