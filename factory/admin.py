@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Customer, EmployeeSalaryPayment, EmployeeWork, ProductCategory, Order, OrderDetail, ReceiveMoney, Employee
+from .models import Customer, ProductCategory, Order, OrderDetail, ReceiveMoney
 from jalali_date import datetime2jalali, date2jalali
 from jalali_date.admin import ModelAdminJalaliMixin, StackedInlineJalaliMixin, TabularInlineJalaliMixin
 from django.utils.html import format_html, urlencode
@@ -7,6 +7,7 @@ from django.db.models import Count
 from django.urls  import reverse
 from django.utils.safestring import mark_safe
 from django_admin_inline_paginator.admin import TabularInlinePaginated
+
 # Register your models here.
 
 
@@ -21,14 +22,6 @@ def order_pdf(obj):
     url = reverse("factory:admin_order_pdf", args=[obj.id])
     return mark_safe(f"<a target='_blank' href='{url}'>چاپ</a>")
 order_pdf.short_description = "چاپ جزییات فرمایش"
-
-
-# employee work deta
-def employee_work(obj):
-    url = reverse("factory:employee_work_detail", args=[obj.id])
-    return mark_safe(f"<a href='{url}'>نمایش</a>")
-
-employee_work.short_description = "لیست کارکرد ها"
 
 
 def remain_amount_order(obj): # it will pass a ReceiveMoney object
@@ -170,65 +163,4 @@ class ReceiveMoneyAdmin(ModelAdminJalaliMixin, admin.ModelAdmin):
             
         }),
     )
-@admin.register(EmployeeWork)
-class EmWAdmin(admin.ModelAdmin):
-    def has_module_permission(self, request):
-        return False
-    search_fields = ["work"]
-
-
-
-class EmployeeWorkAdmin(ModelAdminJalaliMixin, TabularInlinePaginated):
-    def get_created_jalali(self, obj):
-        return date2jalali(obj.assigned_date).strftime('%Y/%m/%d')
-    fieldsets = (
-        ("کارکرد ها", {
-            "fields" : [("order_detail", "qty", "fees", "done", ), ("assigned_date", )], 
-            "classes" : ("collapse", )
-
-        }),
-    )
-    raw_id_fields = ["order_detail"]
-    model = EmployeeWork
-    per_page = 10
-    extra = 0
-
-
-
-
-
-class EmployeeSalaryPaymentAdmin(ModelAdminJalaliMixin, TabularInlinePaginated):
-    fields = [("work", "paid_amount", "paid_at", )]
-    autocomplete_fields = ["work"]
-    model = EmployeeSalaryPayment
-    extra = 0
-    per_page = 10
-    def get_created_jalali(self, obj):
-        return date2jalali(obj.paid_at).strftime('%Y/%m/%d')
-
-    
-
-# employee admin
-@admin.register(Employee)
-class EmployeeAdmin(ModelAdminJalaliMixin, admin.ModelAdmin):
-    def get_created_jalali(self, obj):
-        return date2jalali(obj.created_at).strftime('%Y/%m/%d')
-    list_display = ("first_name", "last_name", "phone_number", "position", "address", "emp_type", "salary", employee_work, )
-    list_filter = ["address", "emp_type", "salary", "position", "created_at"]
-    search_fields = ("first_name", "last_name", "emp_type", "phone_number", "address", )
-    list_editable = ["emp_type"]
-    readonly_fields = ["total_work"]
-    list_per_page = 10
-    inlines = [EmployeeWorkAdmin, EmployeeSalaryPaymentAdmin]
-
-    fieldsets = (
-        ("مشخصات کارمند", {
-            "fields" : [("first_name", "last_name", "emp_type", ), ("phone_number", "address", "position",), ("created_at",), ("total_work",),]
-        }), 
-        ("معاش کارمند", {
-            "fields" : ["salary"], 
-            "classes" : ("collapse",)
-        }),
-    )
-
 

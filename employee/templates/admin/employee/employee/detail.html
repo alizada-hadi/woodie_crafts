@@ -1,0 +1,58 @@
+{% extends 'admin/base_site.html' %}
+{% load jalali_tags %}
+{% block title %}
+    حسابات {{employee.first_name}} {{employee.last_name}} {{block.super}}
+{% endblock title %}
+
+
+{% block breadcrumbs %}
+    <div class="breadcrumbs">
+    <a href="{% url "admin:index" %}">شروع</a> &rsaquo;
+    <a href="{% url "admin:employee_employee_changelist" %}">لیست کارکرد ها</a>
+    &rsaquo;
+    <a href="{% url "admin:employee_employee_change" employee.id %}">لیست حسابات آقای {{employee.first_name }} {{employee.last_name}}</a>
+    &rsaquo; جزییات
+    </div>
+{% endblock breadcrumbs %}
+
+{% block content %}
+    <h1>لیست کارکرد و حسابات {{employee.position}} آقای {{employee.first_name}} {{employee.last_name}}</h1>
+    <ul class="object-tools">
+        <li>
+            <a href="#" onclick="window.print();">چاپ این صفحه</a>
+        </li>
+    </ul>
+
+    <div class="module">
+        <h2>لیست حسابات</h2>
+        <table style="width: 100%;">
+            <thead>
+                <tr>
+                    <th>شماره</th>
+                    <th>کارکرد</th>
+                    <th>تعداد</th>
+                    <th>میزان دستمزد</th>
+                    <th>مجموع</th>
+                    <th>مساعده</th>
+                    <th>باقی مانده</th>
+                    <th>تاریخ</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in employee.employeesalarypayment_set.all %}
+                    <tr>
+                        <td>{{forloop.counter}}</td>
+                        <td>{{item.work}}</td>
+                        <td>{{item.work.qty}}</td>
+                        <td>{{item.work.fees}}</td>
+                        <td>{{total|floatformat:"2"}}</td>
+                        <td>{{item.paid_amount}}</td>
+                        <td>{{item.remain_amount}}</td>
+                        <td>{{item.paid_at|to_jalali:"%Y/%m/%d"}}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+{% endblock content %}

@@ -40,6 +40,7 @@ INSTALLED_APPS = [
 
     # custom apps
     'factory.apps.FactoryConfig', 
+    'employee.apps.EmployeeConfig',
 
     # 3rd party apps
     'jalali_date',
