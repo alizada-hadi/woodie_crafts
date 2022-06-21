@@ -112,6 +112,7 @@ class ReceiveMoney(models.Model):
     receive_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name="مقدار اخذ شده")
     price_unit = models.CharField(max_length=20, choices=PRICE_UNIT, default="دالر", verbose_name="واحد پول")
     remain_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name="مقدار باقی مانده")
+    mark_as_received = models.BooleanField(default=False, verbose_name="تصفیه شده")
     receive_date = models.DateField(verbose_name="تاریخ اخذ پول")
 
 

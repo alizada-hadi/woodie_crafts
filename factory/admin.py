@@ -7,7 +7,7 @@ from django.db.models import Count
 from django.urls  import reverse
 from django.utils.safestring import mark_safe
 from django_admin_inline_paginator.admin import TabularInlinePaginated
-
+from django.contrib.auth.models import Group
 # Register your models here.
 
 
@@ -28,6 +28,8 @@ def remain_amount_order(obj): # it will pass a ReceiveMoney object
     total = obj.order.amount
     return total
 
+# apply custom filter for customer orders
+admin.site.unregister(Group)
 
 
 @admin.register(OrderDetail)
@@ -37,8 +39,10 @@ class OrderDetailAdmin(admin.ModelAdmin):
     def has_change_permission(self, request, obj = None):
         return False
     list_display = ["product", "order", "height", "width", "depth", "direction", "qty", "price"]
-    list_filter = ["direction", "price", "height", "width", "depth"]
+    list_filter = ["direction", "product"]
     search_fields = ["height", "width", "direction"]
+
+
 
 class OrderDetailInline(admin.StackedInline):
     fieldsets = (
@@ -101,6 +105,7 @@ class CustomerAdmin(ModelAdminJalaliMixin, admin.ModelAdmin):
     search_fields = ["first_name", "last_name", "address"]
     list_editable = ["created"]
     date_hierarchy = 'created'
+    list_per_page = 10
 
     @admin.display(ordering="number_of_order")
     def number_of_order(self, customer):
@@ -135,6 +140,8 @@ class ProductCategoryAdmin(ModelAdminJalaliMixin, admin.ModelAdmin):
 
     list_display = ["category_name", "image_tag", "get_created_jalali"]
     search_fields = ["product"]
+    list_filter = ["category_name", "created"]
+
 
 @admin.register(ReceiveMoney)
 class ReceiveMoneyAdmin(ModelAdminJalaliMixin, admin.ModelAdmin):
@@ -143,14 +150,10 @@ class ReceiveMoneyAdmin(ModelAdminJalaliMixin, admin.ModelAdmin):
 
     get_created_jalali.short_description = 'تاریخ اخذ پول'
     def save_model(self, request, obj, form, change):
-        total = 0
-        for i in obj.order.orderdetail_set.all():
-            total += i.price * i.qty
-        x = total - form.cleaned_data["receive_amount"]
         if change:
-            obj.remain_amount = x
+            obj.remain_amount = obj.order.amount
         obj.save()
-    list_display = ["order", "receive_amount", "price_unit", "remain_amount", "get_created_jalali"]
+    list_display = ["order", "receive_amount", "price_unit", "remain_amount", "mark_as_received", "get_created_jalali"]
     list_editable = ["receive_amount", "price_unit"]
     list_filter = ["order__customer", "receive_amount", "remain_amount", "price_unit", "receive_date"]
     autocomplete_fields = ["order"]

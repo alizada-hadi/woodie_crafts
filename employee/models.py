@@ -38,7 +38,7 @@ class EmployeeWork(models.Model):
 
 
     def __str__(self):
-        return f"{self.order_detail.product.category_name}"
+        return f"کار {self.order_detail.qty} دانه {self.order_detail.product.category_name} از {self.order_detail.order.customer.first_name} {self.order_detail.order.customer.last_name}"
 
     class Meta:
         verbose_name = "کارکرد کارمند"
@@ -46,9 +46,10 @@ class EmployeeWork(models.Model):
 
 class EmployeeSalaryPayment(models.Model):
     employee = models.ForeignKey(Employee, on_delete=models.SET_NULL, null=True, verbose_name="کارمند")
-    work = models.ForeignKey(EmployeeWork, on_delete=models.CASCADE, verbose_name="بابت کار")
+    work = models.ForeignKey(EmployeeWork, on_delete=models.CASCADE, verbose_name="بابت کار", null=True, blank=True)
     paid_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name="مساعده")
     remain_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name="باقی مانده")
+    description = models.CharField(max_length=200, verbose_name="توضیحات")
     paid_at = models.DateField(verbose_name="تاریخ پرداخت")
 
 
@@ -58,3 +59,23 @@ class EmployeeSalaryPayment(models.Model):
     class Meta:
         verbose_name = "حساب کارمندان"
         verbose_name_plural = "حساب کارمندان"
+
+
+
+class EmployeeAttendance(models.Model):
+    STATUS = (
+        ("حاضر", "حاضر"),
+        ("غایب", "غایب"),
+    )
+    employee = models.ForeignKey(Employee, on_delete=models.CASCADE, verbose_name="مشخصات کارمند")
+    status = models.CharField(max_length=20, choices=STATUS, default="حاضر", verbose_name="وضعیت")
+    delay = models.BooleanField(default=False, verbose_name="تاخیر بیش از نیم ساعت")
+    penalty = models.DecimalField(max_digits=6, decimal_places=2, default=0, verbose_name="مقدار جریمه به افغانی")
+    date = models.DateField(verbose_name="تاریخ")
+
+    def __str__(self) -> str:
+        return f"حاضری {self.employee.first_name} {self.employee.last_name}"
+
+    class Meta:
+        verbose_name = "حاضری کارمندان"
+        verbose_name_plural = "حاضری کارمندان"

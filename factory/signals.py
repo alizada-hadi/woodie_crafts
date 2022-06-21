@@ -5,6 +5,7 @@ from .models import  (
     OrderDetail, 
     ReceiveMoney
 )
+from report.models import Income
 
 
 @receiver(post_save, sender=OrderDetail)
@@ -36,8 +37,17 @@ def receive_create_money(sender, instance, created, *args, **kwargs):
     if created:
         order = Order.objects.get(id=instance.order.id)
         order.amount -= instance.receive_amount
+        Income.objects.create(
+            title = "دریافت از مشتری", 
+            amount = instance.receive_amount, 
+            date = instance.receive_date
+        )
         receive = ReceiveMoney.objects.get(id=instance.id)
         receive.remain_amount = instance.order.amount - instance.receive_amount
+        if receive.remain_amount == 0:
+            receive.mark_as_received = True
+        else:
+            receive.mark_as_received = False
         receive.save()
         order.save()
 
@@ -50,10 +60,9 @@ def receive_create_money(sender, instance, created, *args, **kwargs):
         x = 0
         for i in order.receivemoney_set.all():
             x += i.receive_amount
-        order.amount -= x 
-        receive.remain_amount -= x
+        print(f"the value of x is  {x} and the value  of order.amount {order.amount}")
+        order.amount -= x
         order.save()
-
 
 
 @receiver(post_delete, sender=ReceiveMoney)
